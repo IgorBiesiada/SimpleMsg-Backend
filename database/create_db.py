@@ -1,4 +1,5 @@
-from psycopg2 import connect, OperationalError
+from psycopg2 import connect, errors 
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from dotenv import load_dotenv
 import os
 
@@ -9,43 +10,58 @@ HOST = os.getenv('HOST')
 PASSWORD = os.getenv("PASSWORD")
 DATABASE = os.getenv("DATABASE")
 
-ctx = connect(user=USER, password=PASSWORD, host=HOST, database=DATABASE)
-ctx.autocommit = True
-
-try:
-    ctx
-except OperationalError:
-    print("połączenie nieudane")
-
-create_table_users = """ 
-    CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
-    hashed_password VARCHAR(80) NOT NULL 
-    )
-"""
-
-create_table_messages = """
-    CREATE TABLE IF NOT EXISTS message (
-    id SERIAL PRIMARY KEY,
-    from_id INT NOT NULL,
-    to_id INT NOT NULL,
-    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    text VARCHAR(255),
-    FOREIGN KEY (from_id) REFERENCES users(id),
-    FOREIGN KEY (to_id) REFERENCES users(id)
-    )
-"""
-
-def exec_sql(sql):
-    
+def create_db():
+    ctx = connect(user=USER, password=PASSWORD, host=HOST, database=DATABASE)
+    ctx.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cursor = ctx.cursor()
-    cursor.execute(sql)
+
+    try:
+        cursor.execute("CREATE DATABASE message_app_db;")
+        print("Baza utworzona")
+    except errors.DuplicateDatabase:
+        print("Baza juz istnieje")
+    finally:
+        ctx.close()
+        cursor.close()
+
+def create_tables():
+    ctx = connect(user=USER, password=PASSWORD, host=HOST, database=DATABASE)
+    ctx.autocommit = True
+    cursor = ctx.cursor()
+    
+    queries = {
+    
+    "users": """  
+        CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(255) NOT NULL,
+        hashed_password VARCHAR(80) NOT NULL 
+        )
+    """,
+
+    "message": """
+        CREATE TABLE IF NOT EXISTS message (
+        id SERIAL PRIMARY KEY,
+        from_id INT NOT NULL,
+        to_id INT NOT NULL,
+        creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        text VARCHAR(255),
+        FOREIGN KEY (from_id) REFERENCES users(id),
+        FOREIGN KEY (to_id) REFERENCES users(id)
+        )   
+    """
+    }
+
+    for table_name, sql in queries.items():
+        try:
+            cursor.execute(sql)
+            print("Tabela utworzona")
+        except errors.DuplicateTable:
+            print(f"Tabela {table_name} już istnieje")
+
+    ctx.close()
     cursor.close()
 
-    
-
-exec_sql(create_table_users)
-exec_sql(create_table_messages)
-
-ctx.close()
+if __name__ == "__main__":
+    create_db()
+    create_tables()
