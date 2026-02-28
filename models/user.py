@@ -1,5 +1,5 @@
 import bcrypt
-from psycopg2 import connect 
+from psycopg2 import connect, errors, DatabaseError 
 import os
 from dotenv import load_dotenv
 from contextlib import contextmanager
@@ -52,20 +52,36 @@ class User:
         else:
             print("Hasło nie pasuje")
 
-    def _insert(self, username):
+    def _insert(self):
         
-        with save_data_to_db() as cursor:
-        
-            find_user = "SELECT username FROM users WHERE username = %s"
-            cursor.execute(find_user, username)
-            result = cursor.fetchone()
-            
-            if result is None:
+        try: 
+            with save_data_to_db() as cursor:
                 sql = "INSERT INTO users (username, hashed_password, first_name, last_name) VALUES (%s, %s, %s, %s)"
                 data = (self.username, self._hashed_password.decode('utf-8'), self.first_name, self.last_name)
                 cursor.execute(sql, data)
-
+        except errors.UniqueViolation:
+            print("Uzytkownik o takiej nazwie juz istnieje")
+    
+    def _update(self, **kwargs):
+        data_to_update = ("username", "first_name", "last_name", "password")
+        
+        for key, value in kwargs.items():
+            if key not in data_to_update:
+                raise ValueError
+        
+            if key == "password":
+                b_password = value.encode('utf-8')
+                hashed_password = bcrypt.hashpw(b_password, bcrypt.gensalt())
+                setattr(self, "_hashed_password", hashed_password)
             
+            elif key in data_to_update:
+                setattr(self, key, value)
+        
+        try:
+            with save_data_to_db() as cursor:
+                sql = "UPDATE users SET username=%s, first_name=%s, last_name=%s, hashed_password=%s"
+                data = (self.username, self.first_name, self.last_name, self._hashed_password.decode('utf-8'))
+                cursor.execute(sql, data)
+        except DatabaseError as e:
+            print(f"Coś poszło nie tak: {e}")
 
-u = User("marek", "siema1234")
-u.save_to_db()
