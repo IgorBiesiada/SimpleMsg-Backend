@@ -85,3 +85,56 @@ class User:
         except DatabaseError as e:
             print(f"Coś poszło nie tak: {e}")
 
+    def load_user_by_username(self, username: str):
+        
+        try:
+            with save_data_to_db() as cursor:
+                sql = "SELECT username, first_name, last_name FROM users WHERE username = %s"
+                data = (username,)
+                cursor.execute(sql, data)
+                result = cursor.fetchone()
+                
+                return result[0] 
+        
+        except DatabaseError as e:
+            print(f"Uzytkownik o takiej nazwie nie istnieje {e}")
+
+
+    def load_user_by_id(self, id: int):
+        
+        try:
+            with save_data_to_db() as cursor:
+                sql = "SELECT username, first_name, last_name FROM users WHERE id = %s"
+                data = (id,)
+                cursor.execute(sql, data)
+                result = cursor.fetchone()
+                
+                return result[0] 
+        
+        except DatabaseError as e:
+            print(f"Uzytkownik o takim id nie istnieje {e}")
+
+    @staticmethod
+    def load_all_users():
+
+        try:
+            with save_data_to_db() as cursor:
+                sql = "SELECT username, first_name, last_name FROM users"
+                cursor.execute(sql)
+                result = cursor.fetchall()
+                
+                return result
+        
+        except DatabaseError as e:
+            print(e)       
+
+    def _delete(self, username):
+
+        pass
+
+
+u = User("manio33", "dasfwegw", "maniek", "baniek")
+
+print(u.load_user_by_username("manio33"))
+print(u.load_user_by_id(14))
+print(u.load_all_users())
