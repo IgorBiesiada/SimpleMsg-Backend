@@ -27,9 +27,11 @@ def save_data_to_db():
         ctx.close()
 
 class User:
-    def __init__(self, username, password):
+    def __init__(self, username, password, first_name, last_name):
         self._id = -1
         self.username = username
+        self.first_name = first_name
+        self.last_name = last_name
         self._hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
     
     @property
@@ -50,13 +52,20 @@ class User:
         else:
             print("Hasło nie pasuje")
 
-    def save_to_db(self):
+    def _insert(self, username):
         
         with save_data_to_db() as cursor:
         
-            sql = "INSERT INTO users (username, hashed_password) VALUES (%s, %s)"
-            data = (self.username, self._hashed_password.decode('utf-8'))
-            cursor.execute(sql, data)
+            find_user = "SELECT username FROM users WHERE username = %s"
+            cursor.execute(find_user, username)
+            result = cursor.fetchone()
+            
+            if result is None:
+                sql = "INSERT INTO users (username, hashed_password, first_name, last_name) VALUES (%s, %s, %s, %s)"
+                data = (self.username, self._hashed_password.decode('utf-8'), self.first_name, self.last_name)
+                cursor.execute(sql, data)
+
+            
 
 u = User("marek", "siema1234")
 u.save_to_db()
