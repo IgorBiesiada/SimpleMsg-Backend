@@ -28,8 +28,8 @@ def test_db_status(connect_db: cursor):
 
 def test_insert_user_into_db(connect_db: cursor):
     
-    sql = "INSERT INTO users (username, hashed_password) VALUES (%s, %s) RETURNING id;"
-    connect_db.execute(sql, ('some_name', 'some_pass'))
+    sql = "INSERT INTO users (username, hashed_password, first_name, last_name) VALUES (%s, %s, %s, %s) RETURNING id;"
+    connect_db.execute(sql, ('some_name', 'some_pass', 'some_name', 'some_last_name'))
         
     user_id = connect_db.fetchone()[0]
     assert user_id is not None
