@@ -56,7 +56,7 @@ class User:
         
         try: 
             with save_data_to_db() as cursor:
-                sql = "INSERT INTO users (username, hashed_password, first_name, last_name) VALUES (%s, %s, %s, %s);"
+                sql = "INSERT INTO users (username, hashed_password, first_name, last_name) VALUES (%s, %s, %s, %s) RETURNING id;"
                 data = (self.username, self._hashed_password.decode('utf-8'), self.first_name, self.last_name)
                 cursor.execute(sql, data)
         except errors.UniqueViolation:
@@ -139,3 +139,6 @@ class User:
         except DatabaseError as e:
             print(e)
 
+u = User("adam23333", "nierfbisaf", "adam", "baran")
+u._insert()
+print(u.load_all_users())
