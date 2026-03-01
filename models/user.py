@@ -56,7 +56,7 @@ class User:
         
         try: 
             with save_data_to_db() as cursor:
-                sql = "INSERT INTO users (username, hashed_password, first_name, last_name) VALUES (%s, %s, %s, %s)"
+                sql = "INSERT INTO users (username, hashed_password, first_name, last_name) VALUES (%s, %s, %s, %s);"
                 data = (self.username, self._hashed_password.decode('utf-8'), self.first_name, self.last_name)
                 cursor.execute(sql, data)
         except errors.UniqueViolation:
@@ -79,7 +79,7 @@ class User:
         
         try:
             with save_data_to_db() as cursor:
-                sql = "UPDATE users SET username=%s, first_name=%s, last_name=%s, hashed_password=%s"
+                sql = "UPDATE users SET username=%s, first_name=%s, last_name=%s, hashed_password=%s;"
                 data = (self.username, self.first_name, self.last_name, self._hashed_password.decode('utf-8'))
                 cursor.execute(sql, data)
         except DatabaseError as e:
@@ -89,7 +89,7 @@ class User:
         
         try:
             with save_data_to_db() as cursor:
-                sql = "SELECT username, first_name, last_name FROM users WHERE username = %s"
+                sql = "SELECT username, first_name, last_name FROM users WHERE username = %s;"
                 data = (username,)
                 cursor.execute(sql, data)
                 result = cursor.fetchone()
@@ -104,7 +104,7 @@ class User:
         
         try:
             with save_data_to_db() as cursor:
-                sql = "SELECT username, first_name, last_name FROM users WHERE id = %s"
+                sql = "SELECT username, first_name, last_name FROM users WHERE id = %s;"
                 data = (id,)
                 cursor.execute(sql, data)
                 result = cursor.fetchone()
@@ -119,7 +119,7 @@ class User:
 
         try:
             with save_data_to_db() as cursor:
-                sql = "SELECT username, first_name, last_name FROM users"
+                sql = "SELECT username, first_name, last_name FROM users;"
                 cursor.execute(sql)
                 result = cursor.fetchall()
                 
@@ -130,11 +130,12 @@ class User:
 
     def _delete(self, username):
 
-        pass
+        try:
+            with save_data_to_db() as cursor:
+                sql = "DELETE FROM users WHERE username = %s;"
+                cursor.execute(sql, (username,))
+                print(f"Usunięto uzytkonika o nazwie {username}")
+        
+        except DatabaseError as e:
+            print(e)
 
-
-u = User("manio33", "dasfwegw", "maniek", "baniek")
-
-print(u.load_user_by_username("manio33"))
-print(u.load_user_by_id(14))
-print(u.load_all_users())
