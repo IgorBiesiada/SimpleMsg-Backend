@@ -21,10 +21,10 @@ def save_data_to_db():
     
     except Exception as e:
         print(f"Błąd {e}")
-    
+        raise
     finally:
-        cursor.close()
-        ctx.close()
+        if cursor: cursor.close()
+        if ctx: ctx.close()
 
 class User:
     def __init__(self, username, first_name="", last_name="", password=None):
@@ -85,14 +85,15 @@ class User:
         
         try:
             with save_data_to_db() as cursor:
-                sql = "SELECT username, first_name, last_name, hashed_password FROM users WHERE username = %s;"
+                sql = "SELECT id, username, first_name, last_name, hashed_password FROM users WHERE username = %s;"
                 data = (username,)
                 cursor.execute(sql, data)
                 result = cursor.fetchone()
                 
                 if result:
-                    user = cls(username=result[0], first_name=result[1], last_name=result[2])
-                    user._hashed_password = result[3]
+                    user = cls(username=result[1], first_name=result[2], last_name=result[3])
+                    user._hashed_password = result[4]
+                    user._id = result[0]
                     return user
                 
                 else:

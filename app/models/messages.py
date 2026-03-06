@@ -1,4 +1,4 @@
-from user import save_data_to_db
+from models.user import save_data_to_db
 from psycopg2 import DatabaseError
 
 class Message:
@@ -7,7 +7,7 @@ class Message:
         self.from_id = from_id
         self.to_id = to_id
         self.text = text
-        self.creation_data = None
+        self.creation_date = None
     
     @property
     def id(self):
