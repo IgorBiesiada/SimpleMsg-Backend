@@ -33,8 +33,16 @@ class Message:
                 cursor.execute(sql)
                 result = cursor.fetchall()
                 
-                return result
-        
-        except DatabaseError as e:
-            print(e)       
+                message_list = []
+                for row in result:
+                    message_list.append({
+                        "from_id": row[0],
+                        "to_id": row[1],
+                        "text": row[2]
+                    })
 
+                return message_list
+
+        except DatabaseError as e:
+            print(f"błąd {e}")
+            return []
