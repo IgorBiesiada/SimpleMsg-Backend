@@ -125,11 +125,20 @@ class User:
                 sql = "SELECT username, first_name, last_name FROM users;"
                 cursor.execute(sql)
                 result = cursor.fetchall()
-                return result
-        
+                
+                users_list = []
+                for row in result:
+                    users_list.append({"username": row[1],
+                                        "first_name": row[2],
+                                        "last_name": row[3]
+                                       })
+
+                return users_list
+
         except DatabaseError as e:
             print(e)       
-
+            return []
+    
     def _delete(self, username):
 
         try:
