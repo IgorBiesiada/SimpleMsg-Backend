@@ -28,3 +28,8 @@ class Message(BaseModel):
     from_id: int
     to_id: int
     text: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    
