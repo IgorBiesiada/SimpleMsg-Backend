@@ -1,10 +1,21 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Depends
 from api.api_models import UserCreate, DeleteUser, ChangePassword, UsersList, Message
 from models.user import User
 from models.messages import Message as M
-from typing import List
+from typing import Annotated
+from psycopg2.extensions import connection as PostgreConnection
+from api.auth import get_db, get_current_user
 
 app = FastAPI()
+
+db_dependency = Annotated[PostgreConnection, Depends(get_db)]
+user_dependency = Annotated[dict, Depends(get_current_user)]
+
+@app.get('/', status_code=status.HTTP_200_OK)
+async def user(user: user_dependency, db: db_dependency):
+    if user is None:
+        raise HTTPException(status_code=401, detail="failed")
+    return {'User': user}
 
 @app.post("/register")
 def create_user(data: UserCreate):
