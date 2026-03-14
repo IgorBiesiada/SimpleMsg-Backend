@@ -103,7 +103,8 @@ class User:
             print(f"Uzytkownik o takiej nazwie nie istnieje {e}")
 
 
-    def load_user_by_id(self, id: int):
+    @classmethod
+    def load_user_by_id(cls, id: int):
         
         try:
             with save_data_to_db() as cursor:
@@ -112,11 +113,21 @@ class User:
                 cursor.execute(sql, data)
                 result = cursor.fetchone()
                 
-                return result[0] 
-        
+                if result:
+                    return cls(
+                        id=result[0], 
+                        username=result[1], 
+                        first_name=result[2], 
+                        last_name=result[3], 
+                        hashed_password=result[4]
+                    ) 
+                return None
+
         except DatabaseError as e:
             print(f"Uzytkownik o takim id nie istnieje {e}")
-
+            return None
+    
+    
     @staticmethod
     def load_all_users():
 

@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 import os
 from psycopg2 import connect
 from psycopg2.extensions import connection as PostgreConnection
-from api_models import Token
+from .api_models import Token
 from models.user import User
 from bcrypt import checkpw
 
@@ -29,7 +29,7 @@ DATABASE = os.getenv("DATABASE")
 
 
 
-bcrypt_context = CryptContext(schemes=['bcrypt'], deprecadet='auto')
+bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 
 
@@ -54,10 +54,10 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="could not validate user")
     
     token = create_access__token(user.username, user.id, timedelta(minutes=20))
-    return {'access token': token, 'token_type': 'bearer'}
+    return {'access_token': token, 'token_type': 'bearer'}
 
 
-def authenticate_user(username: str, password: str):
+def authenticate_user(username: str, password: str, db: PostgreConnection):
     user = User.load_user_by_username(username)
     if not user:
         return False
