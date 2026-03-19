@@ -1,5 +1,7 @@
 from models.user import save_data_to_db
 from psycopg2 import DatabaseError
+from models.user import User
+from bcrypt import checkpw
 
 class Message:
     def __init__(self, from_id, to_id, text):
@@ -24,13 +26,13 @@ class Message:
         except DatabaseError as e:
             print(f"Błąd {e}")
     
-    @staticmethod
-    def load_all_messages():
 
+    def load_user_messages(self, id: int):
         try:
             with save_data_to_db() as cursor:
-                sql = "SELECT from_id, to_id, text FROM message;"
-                cursor.execute(sql)
+                sql = "SELECT from_id, to_id, text FROM message WHERE from_id = %s;"
+                data = id
+                cursor.execute(sql, data)
                 result = cursor.fetchall()
                 
                 message_list = []

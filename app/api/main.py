@@ -43,7 +43,7 @@ def delete_user(data: DeleteUser, user: user_dependency, db: db_dependency):
     if u is None:
         return {"error": "user does not exist"}
     
-    u._delete(data.username)
+    u._delete(user.get('username'))
     return {"status": "ok", "deleted user" : data.username}
     
 @app.put("/update_password")
@@ -66,27 +66,55 @@ async def update_password(data: ChangePassword, user: user_dependency, db: db_de
     
 
 @app.get("/users_list", response_model=UsersList)
-async def get_users_list():
+async def get_users_list(user: user_dependency):
+    
+    
     u = User.load_all_users()
     return u
 
 
 @app.get("/username/{username}", response_model=UsersList)
-async def get_user_by_username(username):
+async def get_user_by_username(username, user: user_dependency):
+    
     u = User.load_user_by_username(username)
+    
+    if u is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Użytkownik o nazwie '{username}' nie został znaleziony")   
+    
     return u
 
 
 @app.get("/id/{id}", response_model=UsersList)
-async def get_user_by_id(id):
+async def get_user_by_id(id, user: user_dependency):
     u = User.load_user_by_id(id)
+    
+    if u is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Użytkownik o if '{id}' nie został znaleziony")   
+    
     return u
 
 @app.post("/message")
-async def send_message(data: Message, user: user_dependency, db: db_dependency):
+async def send_message(data: Message, user: user_dependency):
     sender_id = user.get('id')
+    receiver = User.load_user_by_id(data.to_id)
+    
+    if receiver is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Odbiorca o ID {data.to_id} nie istnieje!"
+        )
+    
+    if sender_id == receiver.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Nie można wysłać wiadomości do samego siebie"
+        )
+    
     
     m = M(sender_id, data.to_id, data.text)
+    
     m.save_to_db()
     
     return {
@@ -97,7 +125,8 @@ async def send_message(data: Message, user: user_dependency, db: db_dependency):
 
 
 @app.get("/messages_list")
-def get_message_list(user: user_dependency, db: db_dependency):
-    m = M.load_all_messages()
+def get_message_list(user: user_dependency):
+    
+    m = M.load_user_messages(user.get('id'))
     print(f"debug {m}")
     return m
