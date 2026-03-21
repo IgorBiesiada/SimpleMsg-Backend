@@ -68,7 +68,6 @@ async def update_password(data: ChangePassword, user: user_dependency, db: db_de
 @app.get("/users_list", response_model=UsersList)
 async def get_users_list(user: user_dependency):
     
-    
     u = User.load_all_users()
     return u
 

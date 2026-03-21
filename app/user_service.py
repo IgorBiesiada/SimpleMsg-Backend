@@ -71,7 +71,7 @@ if __name__ == "__main__":
         edit_users_password(username=args.username, old_password=args.password, new_password=args.new_pass)
     
     elif args.delete:
-        delete_user(args.username, args.password)
+        delete_user()
     
     elif args.list:
         print(users_list())

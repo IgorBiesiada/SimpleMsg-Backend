@@ -20,7 +20,7 @@ router = APIRouter(
     tags=['auth']
 )
 
-SECREAT_KEY = os.getenv('SECREAT_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = os.getenv('ALGORITHM')
 USER = os.getenv("USER")
 HOST = os.getenv('HOST')
@@ -69,11 +69,11 @@ def create_access__token(username: str, user_id: int, expires_delta: timedelta):
     encode = {'sub': username, 'id': user_id}
     expires =  datetime.utcnow() + expires_delta
     encode.update({'exp': expires})
-    return jwt.encode(encode, SECREAT_KEY, algorithm=ALGORITHM)
+    return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
     try:
-        payload = jwt.decode(token, SECREAT_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get('sub')
         user_id: int = payload.get('id')
         if username is None or user_id is None:
