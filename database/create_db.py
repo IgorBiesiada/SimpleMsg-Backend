@@ -35,7 +35,7 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username VARCHAR(255) UNIQUE NOT NULL,
-        hashed_password VARCHAR(80) NOT NULL 
+        hashed_password VARCHAR(80) NOT NULL, 
         first_name VARCHAR(100) NOT NULL,
         last_name VARCHAR(100) NOT NULL
         )
@@ -44,12 +44,12 @@ def create_tables():
     "message": """
         CREATE TABLE IF NOT EXISTS message (
         id SERIAL PRIMARY KEY,
-        from_id INT NOT NULL,
-        to_id INT NOT NULL,
+        from_id INT,
+        to_id INT,
         creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         text VARCHAR(255),
-        FOREIGN KEY (from_id) REFERENCES users(id),
-        FOREIGN KEY (to_id) REFERENCES users(id)
+        FOREIGN KEY (from_id) REFERENCES users(id) ON DELETE SET NULL,
+        FOREIGN KEY (to_id) REFERENCES users(id) ON DELETE SET NULL
         )   
     """
     }
