@@ -1,10 +1,11 @@
 from fastapi import FastAPI, HTTPException, status, Depends
-from .api_models import UserCreate, DeleteUser, ChangePassword, UsersList, Message
+from .api_models import UserCreate, ChangePassword, Message, UsersList
 from models.user import User
 from models.messages import Message as M
 from typing import Annotated
 from psycopg2.extensions import connection as PostgreConnection
 from .auth import get_db, get_current_user, router
+from typing import List
 
 app = FastAPI()
 app.include_router(router)
@@ -34,18 +35,22 @@ def create_user(data: UserCreate):
     return {"status": "ok", "dodano": {data.username}}
 
 @app.delete("/delete")
-def delete_user(data: DeleteUser, user: user_dependency, db: db_dependency):
+def delete_user(user: user_dependency, db: db_dependency):
 
     user_id = user.get('id')
+    username = user.get('username')
     
     u = User.load_user_by_id(user_id)
     
     if u is None:
-        return {"error": "user does not exist"}
+        raise HTTPException(status_code=404, detail="User not found")
+    try: 
+        u._delete(username)
+        return {"status": "ok", "deleted user" : username}
     
-    u._delete(user.get('username'))
-    return {"status": "ok", "deleted user" : data.username}
-    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Błąd bazy danych: {e}")   
+
 @app.put("/update_password")
 async def update_password(data: ChangePassword, user: user_dependency, db: db_dependency):
 
@@ -57,15 +62,16 @@ async def update_password(data: ChangePassword, user: user_dependency, db: db_de
         return {"error": "users does not exist"}
 
     try:
-        u.set_new_pass(data.old_password, data.password)
+        u.set_new_pass(data.old_password, data.new_password)
         u._update()
+        return {"status": "ok", "message": "password updated"}
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=str(e))
     
 
-@app.get("/users_list", response_model=UsersList)
+@app.get("/users_list", response_model=List[UsersList])
 async def get_users_list(user: user_dependency):
     
     u = User.load_all_users()
@@ -123,9 +129,11 @@ async def send_message(data: Message, user: user_dependency):
     }
 
 
-@app.get("/messages_list")
+@app.get("/messages_list", response_model=List[Message])
 def get_message_list(user: user_dependency):
+    user_id = user.get('id')
     
-    m = M.load_user_messages(user.get('id'))
+    m = M.load_user_messages(user_id)
+    
     print(f"debug {m}")
     return m
