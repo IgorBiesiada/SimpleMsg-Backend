@@ -3,7 +3,7 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+load_dotenv(override=True)
 
 USER = os.getenv("USER")
 HOST = os.getenv('HOST')
@@ -35,7 +35,7 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username VARCHAR(255) UNIQUE NOT NULL,
-        hashed_password VARCHAR(80) NOT NULL 
+        hashed_password VARCHAR(80) NOT NULL, 
         first_name VARCHAR(100) NOT NULL,
         last_name VARCHAR(100) NOT NULL
         )

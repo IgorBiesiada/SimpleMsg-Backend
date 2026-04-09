@@ -5,3 +5,4 @@ bcrypt==5.0.0
 fastapi[standard]
 passlib==1.7.4
 python-jose==3.5.0
+dicttoxml==1.7.16
