@@ -49,7 +49,9 @@ class Message:
             print(f"błąd {e}")
             return []
     
-    def load_all_messages(self):
+    
+    @staticmethod
+    def load_all_messages():
         try:
             with save_data_to_db() as cursor:
                 sql = 'SELECT text FROM message;'
