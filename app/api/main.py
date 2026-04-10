@@ -5,9 +5,11 @@ from models.messages import Message as M
 from typing import Annotated
 from psycopg2.extensions import connection as PostgreConnection
 from .auth import get_db, get_current_user, router
+from .xml_router import router as xml_router
 
 app = FastAPI()
 app.include_router(router)
+app.include_router(xml_router)
 
 db_dependency = Annotated[PostgreConnection, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]

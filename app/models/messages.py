@@ -48,3 +48,22 @@ class Message:
         except DatabaseError as e:
             print(f"błąd {e}")
             return []
+    
+    
+    @staticmethod
+    def load_all_messages():
+        try:
+            with save_data_to_db() as cursor:
+                sql = 'SELECT text FROM message;'
+                cursor.execute(sql)
+                result = cursor.fetchall()
+
+                messages_list = []
+                for row in result:
+                    messages_list.append({'Wiadomosc': row})
+                
+                return messages_list
+        
+        except DatabaseError as e:
+            print(f"błąd {e}")
+            return []
