@@ -13,6 +13,9 @@ DATABASE = os.getenv("DATABASE")
 
 @contextmanager
 def save_data_to_db():
+    ctx = None
+    cursor = None
+    
     try:
         ctx = connect(user=USER, password=PASSWORD, host=HOST, database=DATABASE)
         ctx.autocommit = True
