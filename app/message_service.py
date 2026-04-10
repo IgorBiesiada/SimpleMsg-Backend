@@ -44,7 +44,7 @@ if __name__ == "__main__":
         else:
             print("Błąd")
     
-    elif args.username and args.password and args.list:
+    elif args.list:
         list_messages()
     
     else:

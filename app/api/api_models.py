@@ -10,19 +10,15 @@ class UserCreate(AuthUser):
     last_name: str
     
 
-class DeleteUser(BaseModel):
-    username: str
-
-
-class ChangePassword(AuthUser):
-    old_password: str
-
-
 class UsersList(BaseModel):
     username: str
     first_name: str
     last_name: str
-    
+
+
+class ChangePassword(BaseModel):
+    old_password: str
+    new_password: str
 
 class Message(BaseModel):
     from_id: int

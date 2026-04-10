@@ -24,14 +24,14 @@ def get_client(token=None):
     return httpx.Client(base_url="http://127.0.0.1:8000", headers=headers)
 
 
-def create_user(token, username, password, first_name, last_name):
+def create_user(username, password, first_name, last_name):
     
     if len(password) < 8:
         print("Za krotkie hasło")
     
     payload = {'username': username, 'password': password, 'first_name': first_name, 'last_name': last_name}
 
-    with get_client(token) as client:
+    with get_client() as client:
         resp = client.post("/register", json=payload)
         print(resp.json())
 
@@ -46,29 +46,49 @@ def edit_users_password(token, old_password, new_password):
 
     with get_client(token) as client:
         resp = client.put("/update_password", json=payload)
-        print(resp.json())
-
-
+        
+        if resp.status_code == 200:
+            print("sukces hasło zostało zmienione")
+        else:
+            print(resp.status_code)
+            try:
+                print("Szczegóły:", resp.json().get('detail'))
+            except:
+                print("Błąd:", resp.text) 
+        
+        
 @auth_required
 def delete_user(token):
 
     with get_client(token) as client:
         resp = client.delete("/delete")
-        print(resp.json())
+        if resp.status_code == 200:
+            print("Twoje konto zostało usunięte")
+        
+        else:
+            print("błąd", resp.status_code)
 
 @auth_required
 def users_list(token):
     
     with get_client(token) as client:
         resp = client.get("/users_list")
-        print(resp.json())
+        if resp.status_code == 200:
+            users = resp.json()
+            print("---Lista---")
+            for user in users:
+                print(f"Nazwa: {user['username']} | Imie: {user['first_name']} | Nazwisko: {user['last_name']}")
+        
+        else:
+            print("błąd pobierania listy", resp.status_code)
+
 
 if __name__ == "__main__":
     if args.username and args.password and args.first_name and args.last_name:
         create_user(args.username, args.password, args.first_name, args.last_name)
     
-    elif args.username and args.password and args.edit and args.new_pass:
-        edit_users_password(username=args.username, old_password=args.password, new_password=args.new_pass)
+    elif  args.password and args.edit and args.new_pass:
+        edit_users_password( old_password=args.password, new_password=args.new_pass)
     
     elif args.delete:
         delete_user()

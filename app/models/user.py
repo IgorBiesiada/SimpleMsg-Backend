@@ -30,7 +30,7 @@ def save_data_to_db():
         if ctx: ctx.close()
 
 class User:
-    def __init__(self, username, first_name="", last_name="", password=None):
+    def __init__(self, username, first_name="", last_name="", password=None, hashed_password=None):
         self._id = -1
         self.username = username
         self.first_name = first_name
@@ -40,6 +40,12 @@ class User:
         if password:
             hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
             self._hashed_password = hashed.decode('utf-8')
+
+        elif hashed_password:
+            self._hashed_password = hashed_password
+
+        else:
+            self._hashed_password = None
     
     @property
     def id(self):
@@ -111,18 +117,17 @@ class User:
         
         try:
             with save_data_to_db() as cursor:
-                sql = "SELECT username, first_name, last_name FROM users WHERE id = %s;"
+                sql = "SELECT username, first_name, last_name, hashed_password FROM users WHERE id = %s;"
                 data = (id,)
                 cursor.execute(sql, data)
                 result = cursor.fetchone()
                 
                 if result:
                     return cls(
-                        id=result[0], 
-                        username=result[1], 
-                        first_name=result[2], 
-                        last_name=result[3], 
-                        hashed_password=result[4]
+                        username=result[0], 
+                        first_name=result[1], 
+                        last_name=result[2], 
+                        hashed_password=result[3]
                     ) 
                 return None
 
@@ -142,9 +147,9 @@ class User:
                 
                 users_list = []
                 for row in result:
-                    users_list.append({"username": row[1],
-                                        "first_name": row[2],
-                                        "last_name": row[3]
+                    users_list.append({"username": row[0],
+                                        "first_name": row[1],
+                                        "last_name": row[2]
                                        })
 
                 return users_list
@@ -153,7 +158,7 @@ class User:
             print(e)       
             return []
     
-    def _delete(self, username):
+    def _delete(self, username: str):
 
         try:
             with save_data_to_db() as cursor:

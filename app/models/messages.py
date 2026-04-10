@@ -27,12 +27,13 @@ class Message:
             print(f"Błąd {e}")
     
 
-    def load_user_messages(self, id: int):
+    @classmethod
+    def load_user_messages(cls, id: int):
         try:
             with save_data_to_db() as cursor:
-                sql = "SELECT from_id, to_id, text FROM message WHERE from_id = %s;"
+                sql = "SELECT from_id, to_id, text FROM message WHERE to_id = %s;"
                 data = id
-                cursor.execute(sql, data)
+                cursor.execute(sql, (data,))
                 result = cursor.fetchall()
                 
                 message_list = []
