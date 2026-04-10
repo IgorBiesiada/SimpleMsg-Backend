@@ -20,7 +20,7 @@ Both components communicate through a well-defined **REST API contract**.
 
 | Layer / Role        | Technology & Version                          |
 |--------------------|-----------------------------------------------|
-| Language           | Python 3.13+                                  |
+| Language           | Python 3.12                                   |
 | Backend Framework  | FastAPI==0.110.0                              |
 | ASGI Server        | Uvicorn==0.27.1                               |
 | Database           | PostgreSQL                                    |
@@ -31,6 +31,7 @@ Both components communicate through a well-defined **REST API contract**.
 | HTTP Client        | httpx==0.27.0                                 |
 | Config Management  | python-dotenv==1.2.1                          |
 | Testing Framework  | pytest==8.0.0                                 |
+| XML Serialization  | dicttoxml==1.7.16                             |
 
 ---
 
@@ -72,6 +73,7 @@ SIMPLEMSG-BACKEND/
 │       ├── api_models.py
 │       ├── auth.py
 │       └── main.py
+|       └── xml_router.py
 ├── auth/
 │   └── auth_user.py
 ├── models/
@@ -188,6 +190,8 @@ Uses **raw SQL + psycopg2** with an **Active Record pattern**.
 * 🗄️ Full control over SQL (no ORM)
 * 🧪 Database integration testing
 * 💻 Developer-friendly CLI interface
+* 🐳 Full Containerization (Docker & Docker Compose) — isolated, reproducible environment
+* 📄 Legacy-Ready Data Export — dedicated XML endpoints for integration with older systems
 
 ---
 
@@ -315,7 +319,6 @@ pytest database/db_test.py
 
 ## 📈 Future Improvements
 
-* Docker support 🐳
 * CI/CD pipeline
 * Web frontend (React) or js
 * Message notifications (WebSockets)
